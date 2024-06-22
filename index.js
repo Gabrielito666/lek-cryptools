@@ -6,7 +6,7 @@ const { randomBytes, createCipheriv, createDecipheriv, createHash } = require('c
  * @param {number} [num=64] length of unique key 
  * @returns {string} the unique key
 */
-const getUinqueKey = (num=64) => randomBytes(num).toString('hex');
+const getUniqueKey = (num=64) => randomBytes(num).toString('hex');
 
 /**
  * encrypt a key
@@ -74,4 +74,4 @@ const decipher = (encrypted, secretKey) => {
         throw new Error('error in lek-sessions when trying to decrypt the session key: ' + err.message);
     }
 };
-module.exports = { getUinqueKey, cipher, decipher, encrypt, compare };
+module.exports = { getUniqueKey, cipher, decipher, encrypt, compare };
