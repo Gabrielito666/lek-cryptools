@@ -1,6 +1,6 @@
 {
   "name": "lek-cryptools",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "'ctyptographic tools'",
   "main": "index.js",
   "scripts": {

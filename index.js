@@ -29,7 +29,7 @@ const getKeyFromSecret = (secretKey) =>
     }
     catch(err)
     {
-        throw new Error('error in lek-cryptools when trying to encrypt the session key: ' + err.message);
+        throw new Error('error in lek-cryptools when trying to encrypt the key: ' + err.message);
     }
 };
 
@@ -48,7 +48,7 @@ const cipher = (data, secretKey) => {
         encrypted += cipher.final('hex');
         return iv.toString('hex') + ':' + encrypted;
     } catch (err) {
-        throw new Error('error in lek-cryptools when trying to encrypt the session key: ' + err.message);
+        throw new Error('error in lek-cryptools when trying to encrypt the key: ' + err.message);
     }
 };
 
@@ -71,7 +71,7 @@ const decipher = (encrypted, secretKey) => {
         return decrypted;
     } catch (err)
     {
-        throw new Error('error in lek-sessions when trying to decrypt the session key: ' + err.message);
+        throw new Error('error in lek-cryptools when trying to decrypt the key: ' + err.message);
     }
 };
 module.exports = { getUniqueKey, cipher, decipher, encrypt, compare };
