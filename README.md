@@ -20,15 +20,41 @@ const lekCryptoTools = require('lek-cryptools');
 
 ### Available Functions
 
+The exported methods are as follows:
+
+- getUniqueKey
+- getUniqueKeySync
+- cipher
+- cipherSync
+- decipher
+- decipherSync
+- encrypt
+- encryptSync
+- compare
+- compareSync
+- cipherStream
+- decipherStream
+
+Many have a sync version. The truth is that the processes are usually very fast and it is not necessary to use the asynchronous view... however it can be useful for encrypting or decrypting large chunks of data in parallel or similar situations. I recommend using the Sync version for most cases.
+
+Versions before 2.0.0 had almost only synchronous versions (except encrypt) so to migrate to later versions you should simply add sync to the method used.
+
+cipher => cipherSync
+
 #### getUniqueKey(num = 64)
 
 Generates a unique key or ID.
 
 ```javascript
-const uniqueKey = lekCryptoTools.getUniqueKey();
+const uniqueKey = await lekCryptoTools.getUniqueKey();
 console.log(uniqueKey); // Outputs a 128-character hexadecimal string
 ```
+or
 
+```javascript
+const uniqueKey = lekCryptoTools.getUniqueKeySync();
+console.log(uniqueKey); // Outputs a 128-character hexadecimal string
+```
 #### encrypt(data, num = 10)
 
 Hashes a string using bcrypt.
@@ -37,13 +63,24 @@ Hashes a string using bcrypt.
 const hashedPassword = await lekCryptoTools.encrypt('myPassword');
 console.log(hashedPassword);
 ```
+or
+```javascript
+const hashedPassword = lekCryptoTools.encryptSync('myPassword');
+console.log(hashedPassword);
+```
 
 #### cipher(data, secretKey)
 
 Encrypts a string or buffer.
 
 ```javascript
-const encryptedData = lekCryptoTools.cipher('sensitive data', 'mySecretKey');
+const encryptedData = await lekCryptoTools.cipher('sensitive data', 'mySecretKey');
+console.log(encryptedData);
+```
+or
+
+```javascript
+const encryptedData = lekCryptoTools.cipherSync('sensitive data', 'mySecretKey');
 console.log(encryptedData);
 ```
 
@@ -52,9 +89,15 @@ console.log(encryptedData);
 Decrypts previously encrypted data.
 
 ```javascript
-const decryptedData = lekCryptoTools.decipher(encryptedData, 'mySecretKey');
+const decryptedData = await lekCryptoTools.decipher(encryptedData, 'mySecretKey');
 console.log(decryptedData); // Outputs: 'sensitive data'
 ```
+or
+```javascript
+const decryptedData = lekCryptoTools.decipherSync(encryptedData, 'mySecretKey');
+console.log(decryptedData); // Outputs: 'sensitive data'
+```
+
 
 #### compare(data, encrypted)
 
@@ -62,6 +105,11 @@ Compares a plain text string with a hashed string.
 
 ```javascript
 const isMatch = await lekCryptoTools.compare('myPassword', hashedPassword);
+console.log(isMatch); // Outputs: true or false
+```
+or
+```javascript
+const isMatch = lekCryptoTools.compareSync('myPassword', hashedPassword);
 console.log(isMatch); // Outputs: true or false
 ```
 
@@ -81,7 +129,7 @@ If you wait for the promise, note that it does not return anything since the ess
 const inputFile = fs.createReadStream('a-file.abc');
 const outputFile = fs.createWriteStream('ciphred-file.enc');
 
-cipherStream(inputFile, outputFile, "secret-key");
+lekCryptoTools.cipherStream(inputFile, outputFile, "secret-key");
 ```
 
 ### decipherStream
@@ -96,8 +144,27 @@ const outputFile = fs.createWriteStream('a-file.abc');
 
 inputFile.on('open', () =>
 {
-    decipherStream(inputDecFile, outputDecFile, key);
+    lekCryptoTools.decipherStream(inputDecFile, outputDecFile, key);
 });
+```
+
+### ERRORS
+
+Finally... ERRORS is an object with two properties. CIPHER and DECIPHER. It is useful if you catch an error and want to know if it comes from here. Especially DECIPHER which is an error that usually has to do with the user setting the wrong decryption key.
+
+```javascript
+
+try
+{
+    const result = await lekCryptoTools.decipher('the-cipher-data', 'incorrect-key');
+}
+catch(err)
+{
+    if(err === lekCryptoTools.ERRORS.DECIPHER)
+    {
+        console.error('the key is incorrect');
+    }
+}
 ```
 
 ## Security Note
@@ -110,7 +177,7 @@ This package uses standard cryptographic libraries, but remember that the securi
 
 ## Contributing
 
-Contributions, issues, and feature requests are welcome. Feel free to check [issues page](https://github.com/yourusername/lek-cryptools/issues) if you want to contribute.
+Contributions, issues, and feature requests are welcome. Feel free to check [issues page](https://github.com/Gabrielito666/lek-cryptools/issues) if you want to contribute.
 
 ## Author
 

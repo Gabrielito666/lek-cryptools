@@ -1,9 +1,24 @@
 const { getUniqueKey } = require('./lib/tools');
-const cipher = require('./lib/cipher');
-const decipher = require('./lib/decipher');
-const encrypt = require('./lib/encrypt');
-const { compare } = require('bcryptjs');
+const { cipher, cipherSync } = require('./lib/cipher');
+const { decipher, decipherSync } = require('./lib/decipher');
+const { encrypt, encryptSync } = require('./lib/encrypt');
+const { compare, compareSync } = require('bcryptjs');
 const cipherStream = require('./lib/cipherStream');
 const decipherStream = require('./lib/decipherStream');
+const ERRORS = require('./lib/errors');
 
-module.exports = { getUniqueKey, cipher, decipher, encrypt, compare, cipherStream, decipherStream };
+module.exports =
+{
+    getUniqueKey,
+    cipher,
+    cipherSync,
+    decipher,
+    decipherSync,
+    encrypt,
+    encryptSync,
+    compare,
+    compareSync,
+    cipherStream,
+    decipherStream,
+    ERRORS
+};
