@@ -1,4 +1,4 @@
-const { getUniqueKey } = require('./lib/tools');
+const { getUniqueKey, getUniqueKeySync } = require('./lib/tools');
 const { cipher, cipherSync } = require('./lib/cipher');
 const { decipher, decipherSync } = require('./lib/decipher');
 const { encrypt, encryptSync } = require('./lib/encrypt');
@@ -10,6 +10,7 @@ const ERRORS = require('./lib/errors');
 module.exports =
 {
     getUniqueKey,
+    getUniqueKeySync,
     cipher,
     cipherSync,
     decipher,
