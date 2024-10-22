@@ -69,6 +69,20 @@ const hashedPassword = lekCryptoTools.encryptSync('myPassword');
 console.log(hashedPassword);
 ```
 
+#### compare(data, encrypted)
+
+Compares a plain text string with a hashed string.
+
+```javascript
+const isMatch = await lekCryptoTools.compare('myPassword', hashedPassword);
+console.log(isMatch); // Outputs: true or false
+```
+or
+```javascript
+const isMatch = lekCryptoTools.compareSync('myPassword', hashedPassword);
+console.log(isMatch); // Outputs: true or false
+```
+
 #### cipher(data, secretKey)
 
 Encrypts a string or buffer.
@@ -97,23 +111,9 @@ or
 const decryptedData = lekCryptoTools.decipherSync(encryptedData, 'mySecretKey');
 console.log(decryptedData); // Outputs: 'sensitive data'
 ```
+In both methods above. If you give a string as the first parameter, a string will be returned. Otherwise, if you enter a buffer, a buffer will be returned.
 
-
-#### compare(data, encrypted)
-
-Compares a plain text string with a hashed string.
-
-```javascript
-const isMatch = await lekCryptoTools.compare('myPassword', hashedPassword);
-console.log(isMatch); // Outputs: true or false
-```
-or
-```javascript
-const isMatch = lekCryptoTools.compareSync('myPassword', hashedPassword);
-console.log(isMatch); // Outputs: true or false
-```
-
-# 2.0.0
+# 3.0.0
 
 This new version includes two new features.
 
@@ -148,9 +148,9 @@ inputFile.on('open', () =>
 });
 ```
 
-### ERRORS
+### LekCryptoolsError
 
-Finally... ERRORS is an object with two properties. CIPHER and DECIPHER. It is useful if you catch an error and want to know if it comes from here. Especially DECIPHER which is an error that usually has to do with the user setting the wrong decryption key.
+Finally... LekCryptoolsError is a class. It is useful if you catch an error and want to know if it comes from here. Especially DECIPHER which is an error that usually has to do with the user setting the wrong decryption key.
 
 ```javascript
 
@@ -160,7 +160,7 @@ try
 }
 catch(err)
 {
-    if(err === lekCryptoTools.ERRORS.DECIPHER)
+    if(err instanceof lekCryptoTools.LekCryptoolsError)
     {
         console.error('the key is incorrect');
     }

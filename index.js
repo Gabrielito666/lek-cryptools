@@ -21,5 +21,5 @@ module.exports =
     compareSync,
     cipherStream,
     decipherStream,
-    ERRORS
+    LekCryptoolsError : ERRORS.LekCryptoolsError
 };
