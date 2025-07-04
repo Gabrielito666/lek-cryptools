@@ -8,7 +8,7 @@ const cipherStream = require('./lib/cipherStream');
 const decipherStream = require('./lib/decipherStream');
 const ERRORS = require('./lib/errors');
 /**
- * @typedef {import("@/lib/types/index").LekCryptoolsAPI} LekCryptoolsAPI 
+ * @typedef {import("./lib/types/index").LekCryptoolsAPI} LekCryptoolsAPI 
 */
 /**@type {LekCryptoolsAPI} */
 module.exports =
