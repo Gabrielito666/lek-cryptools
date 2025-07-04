@@ -96,18 +96,25 @@ export type DecipherStreamFunction = (
   secretKey: string
 ) => Promise<void>;
 
+//ERRORS
+export interface LekCryptoolsErrorType extends Error{};
+export interface LekCryptoolsErrorClass extends Function{
+  new(msg:string, err:Error):LekCryptoolsErrorType;
+  prototype: Error;
+}
+
 export interface LekCryptoolsAPI {
-  getUniqueKey: GetUniqueKeyFunction;
-  getUniqueKeySync: GetUniqueKeySyncFunction;
-  cipher: CipherFunction;
-  cipherSync: CipherSyncFunction;
-  decipher: DecipherFunction;
-  decipherSync: DecipherSyncFunction;
-  encrypt: EncryptFunction;
-  encryptSync: EncryptSyncFunction;
-  compare: (data: string, encrypted: string) => Promise<boolean>;
-  compareSync: (data: string, encrypted: string) => boolean;
-  cipherStream: CipherStreamFunction;
-  decipherStream: DecipherStreamFunction;
-  LekCryptoolsError: typeof import("../errors/index");
+  getUniqueKey(num?: number): Promise<string>;
+  getUniqueKeySync(num?: number): string;
+  cipher<T extends string | Buffer>(data: T, secretKey: string): Promise<T>;
+  cipherSync<T extends string | Buffer>(data: T, secretKey: string): T;
+  decipher<T extends string | Buffer>(data: T, secretKey: string): Promise<T>;
+  decipherSync<T extends string | Buffer>(data: T, secretKey: string): T;
+  encrypt(data: string, num?: number): Promise<string>;
+  encryptSync(data: string, num?: number): string;
+  compare(data: string, encrypted: string): Promise<boolean>;
+  compareSync(data: string, encrypted: string): boolean;
+  cipherStream(input: Readable, output: Writable, key: string): Promise<void>;
+  decipherStream(input: Readable, output: Writable, key: string): Promise<void>;
+  LekCryptoolsError: LekCryptoolsErrorClass;
 }

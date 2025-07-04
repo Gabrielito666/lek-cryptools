@@ -10,6 +10,7 @@ const ERRORS = require('./lib/errors');
 /**
  * @typedef {import("@/lib/types/index").LekCryptoolsAPI} LekCryptoolsAPI 
 */
+/**@type {LekCryptoolsAPI} */
 module.exports =
 {
     getUniqueKey,
