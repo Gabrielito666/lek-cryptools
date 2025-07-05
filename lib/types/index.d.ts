@@ -6,9 +6,9 @@ import { Readable, Writable } from 'stream';
 export type GetKeyFromSecretFunction = (secretKey: string) => Buffer;
 
 /**
- * Generates a random 16-byte initialization vector (IV).
+ * Generates a random 16 or 12 -byte initialization vector (IV).
  */
-export type GetIVFunction = () => Buffer;
+export type GetIVFunction = (mode:"cbc"|"gcm") => Buffer;
 
 /**
  * get a unique key
@@ -28,7 +28,7 @@ export type GetUniqueKeyFunction = (num?: number) => Promise<string>;
 export type CipherSyncFunction = <T extends string | Buffer>(
   data: T,
   secretKey: string,
-  mode?:"cbc"|"gmc"
+  mode?:"cbc"|"gcm"
 ) => T;
   
 /**
@@ -37,7 +37,7 @@ export type CipherSyncFunction = <T extends string | Buffer>(
 export type CipherFunction = <T extends string | Buffer>(
 data: T,
 secretKey: string,
-mode?:"cbc"|"gmc"
+mode?:"cbc"|"gcm"
 ) => Promise<T>;
 
 //DECIPHER
@@ -48,7 +48,7 @@ mode?:"cbc"|"gmc"
 export type DecipherSyncFunction = <T extends string | Buffer>(
   encrypted: T,
   secretKey: string,
-  mode?: "cbc"|"gmc"
+  mode?: "cbc"|"gcm"
 ) => T;
 
 /**
@@ -57,7 +57,7 @@ export type DecipherSyncFunction = <T extends string | Buffer>(
 export type DecipherFunction = <T extends string | Buffer>(
   encrypted: T,
   secretKey: string,
-  mode?: "cbc"|"gmc"
+  mode?: "cbc"|"gcm"
 ) => Promise<T>;
 
 //ENCRYPT
@@ -86,7 +86,7 @@ export type CipherStreamFunction = (
   inputStream: Readable,
   outputStream: Writable,
   secretKey: string,
-  mode?: "cbc"|"gmc"
+  mode?: "cbc"|"gcm"
 ) => Promise<void>;
 
 
@@ -99,7 +99,7 @@ export type DecipherStreamFunction = (
   inputStream: Readable,
   outputStream: Writable,
   secretKey: string,
-  mode?: "cbc"|"gmc"
+  mode?: "cbc"|"gcm"
 ) => Promise<void>;
 
 //ERRORS
@@ -112,15 +112,15 @@ export interface LekCryptoolsErrorClass extends Function{
 export interface LekCryptoolsAPI {
   getUniqueKey(num?: number): Promise<string>;
   getUniqueKeySync(num?: number): string;
-  cipher<T extends string | Buffer>(data: T, secretKey: string, mode?:"cbc"|"gmc"): Promise<T>;
-  cipherSync<T extends string | Buffer>(data: T, secretKey: string, mode?:"cbc"|"gmc"): T;
-  decipher<T extends string | Buffer>(data: T, secretKey: string, mode?:"cbc"|"gmc"): Promise<T>;
-  decipherSync<T extends string | Buffer>(data: T, secretKey: string, mode?:"cbc"|"gmc"): T;
+  cipher<T extends string | Buffer>(data: T, secretKey: string, mode?:"cbc"|"gcm"): Promise<T>;
+  cipherSync<T extends string | Buffer>(data: T, secretKey: string, mode?:"cbc"|"gcm"): T;
+  decipher<T extends string | Buffer>(data: T, secretKey: string, mode?:"cbc"|"gcm"): Promise<T>;
+  decipherSync<T extends string | Buffer>(data: T, secretKey: string, mode?:"cbc"|"gcm"): T;
   encrypt(data: string, num?: number): Promise<string>;
   encryptSync(data: string, num?: number): string;
   compare(data: string, encrypted: string): Promise<boolean>;
   compareSync(data: string, encrypted: string): boolean;
-  cipherStream(input: Readable, output: Writable, key: string, mode?:"cbc"|"gmc"): Promise<void>;
-  decipherStream(input: Readable, output: Writable, key: string, mode?:"cbc"|"gmc"): Promise<void>;
+  cipherStream(input: Readable, output: Writable, key: string, mode?:"cbc"|"gcm"): Promise<void>;
+  decipherStream(input: Readable, output: Writable, key: string, mode?:"cbc"|"gcm"): Promise<void>;
   LekCryptoolsError: LekCryptoolsErrorClass;
 }
