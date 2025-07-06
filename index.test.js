@@ -140,6 +140,8 @@ const runTests = async(...tests) =>
 const original = "this is a text to proof encription";
 const secretKey = "this-is-a-secret-key";
 
+const largeOriginal = "asfkljhaskejkxvcbklajsdbflkjawehrkljhdsfkjckjlsadbnkjlfddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddasdffffffffffffffffffffffffffbkljaerkljhsalkdjcfnklajsdbnrtkljbalkwjebrlkjsbdfjklsadbkljrblkjewabrlkjbsadfkljbsdkljfblakjwebrlksbvfkljbsdflkjbalkrblksajbflkjsa";
+
 const tests = [
   getCipherDacipherTests("sync", "string", "cbc", original, secretKey),
   getCipherDacipherTests("async", "string", "cbc", original, secretKey),
@@ -154,6 +156,11 @@ const tests = [
   getGcmIntegrityTest("async", "string", original, secretKey),
   getGcmIntegrityTest("sync", "buffer", original, secretKey),
   getGcmIntegrityTest("async", "buffer", original, secretKey),
+
+  getGcmIntegrityTest("sync", "string", largeOriginal, secretKey),
+  getGcmIntegrityTest("async", "string", largeOriginal, secretKey),
+  getGcmIntegrityTest("sync", "buffer", largeOriginal, secretKey),
+  getGcmIntegrityTest("async", "buffer", largeOriginal, secretKey),
 
   getWrongKeyTest("sync", "string", "cbc", original, secretKey),
   getWrongKeyTest("async", "string", "cbc", original, secretKey),
