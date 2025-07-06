@@ -20,6 +20,10 @@ export type GetUniqueKeySyncFunction = (num?: number) => string;
  */
 export type GetUniqueKeyFunction = (num?: number) => Promise<string>;
 
+/**
+ * is or not an hexagecimal string
+ */
+export type IsHexFunction = (str:string) => boolean;
 //CIPHER
 
 /**

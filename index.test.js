@@ -82,7 +82,7 @@ const getGcmIntegrityTest = (syncOrAsync, bufferOrString, original, secretKey) =
 
     // Alteramos la clave levemente (agregamos un carácter)
     const corruptedCiphred = bufferOrString === "string" ?
-      Buffer.concat([Buffer.from(ciphred), Buffer.from("trash-bytes")]).toString("hex") :
+      ciphred + "trash-bytes" :
       Buffer.concat([ciphred, Buffer.from("trash-bytes")])
     ;
 

@@ -180,22 +180,6 @@ This enhancement allows for stronger security using AES-GCM while maintaining su
 
 This package uses standard cryptographic libraries, but remember that the security of your application depends on how you manage your secret keys and sensitive data. Always follow best practices for key management and never expose your secret keys.
 
-
-> ⚠️ **Important Note about Integrity and Hex Strings**
->
-> When encrypted data is converted to a hex string (using `.toString('hex')`), appending extra non-hex characters to the end of the string **will not trigger an error** when decoding it back using `Buffer.from(str, 'hex')`.
->
-> This is because Node.js silently ignores invalid hex characters and incomplete byte pairs at the end of the string.
->
-> As a result, if you're using `"gcm"` mode (which provides authenticated encryption), **tampering with the hex string may go undetected unless you validate it first**.
->
-> To mitigate this:
-> - Prefer using `Buffer` objects when validating integrity is critical.
-> - If you must use strings, validate that the string only contains valid hex characters and has even length.
-> - Alternatively, use `'base64'` encoding instead of `'hex'`, since `Buffer.from(str, 'base64')` **will throw an error** if the input is corrupted.
->
-> This is especially important when dealing with authentication tokens or any security-sensitive encrypted data.
-
 ## License
 
 [ISC]
