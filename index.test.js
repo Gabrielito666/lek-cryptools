@@ -81,9 +81,12 @@ const getGcmIntegrityTest = (syncOrAsync, bufferOrString, original, secretKey) =
     const ciphred = await cipherFunction(originalData, secretKey, "gcm");
 
     // Alteramos la clave levemente (agregamos un carácter)
-    const wrongKey = secretKey + "X";
+    const corruptedCiphred = bufferOrString === "string" ?
+      Buffer.concat([Buffer.from(ciphred), Buffer.from("trash-bytes")]).toString("hex") :
+      Buffer.concat([ciphred, Buffer.from("trash-bytes")])
+    ;
 
-    await decipherFunction(ciphred, wrongKey, "gcm");
+    await decipherFunction(corruptedCiphred, secretKey, "gcm");
 
     // Si NO lanza error, la prueba falla
     console.error(testName, "REJECTED (no se detectó alteración)");
@@ -140,7 +143,7 @@ const runTests = async(...tests) =>
 const original = "this is a text to proof encription";
 const secretKey = "this-is-a-secret-key";
 
-const largeOriginal = "asfkljhaskejkxvcbklajsdbflkjawehrkljhdsfkjckjlsadbnkjlfddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddasdffffffffffffffffffffffffffbkljaerkljhsalkdjcfnklajsdbnrtkljbalkwjebrlkjsbdfjklsadbkljrblkjewabrlkjbsadfkljbsdkljfblakjwebrlksbvfkljbsdflkjbalkrblksajbflkjsa";
+const largeOriginal = "576bd8bd6be4c6fb9122be73da55277a8b77495bc2d999396e551846c48bba54a698a47ca336fa8b51c3a2e62b98bb7cf9123a3303b1fb180d97666123e27d6861b20aa3f3ab5158b9ceb7cab7590b022c8c1901530290896aeb1461907b64f8";
 
 const tests = [
   getCipherDacipherTests("sync", "string", "cbc", original, secretKey),
