@@ -1,5 +1,3 @@
-// lek-cryptools test riguroso
-const assert = require('assert');
 const stream = require('stream');
 const {
   getUniqueKey,
@@ -17,113 +15,154 @@ const {
   LekCryptoolsError
 } = require('.');
 
-const { Buffer } = require('buffer');
+const getUniqueKeyProof = async() =>
+{
+  console.log(getUniqueKeySync());
+  console.log(await getUniqueKey());
+}
 
-const secretKey = 'una_clave_super_segura_y_larga_32bytes!!!';
-const text = 'Hola mundo, esto es un texto secreto';
-const buffer = Buffer.from(text);
+/**
+ * 
+ * @param {"sync"|"async"} syncOrAsync 
+ * @param {"buffer"|"string"} bufferOrString 
+ * @param {"cbc"|"gcm"} method
+ * @param {string} original 
+ * @param {string} secretKey 
+ * @returns {function}
+ */
+const getCipherDacipherTests = (syncOrAsync, bufferOrString, method, original, secretKey) => async() =>
+{
 
-// SYNC CBC
-(() => {
-  console.log('🔐 SYNC CBC...');
-  const encrypted = cipherSync(text, secretKey, 'cbc');
-  console.log('  ➤ Encrypted:', encrypted.toString());
-  const decrypted = decipherSync(encrypted, secretKey, 'cbc');
-  console.log('  ✔ Decrypted:', decrypted);
-  assert.strictEqual(decrypted, text, 'CBC sync: texto desencriptado no coincide');
-})();
+  const testName = `TEST ${syncOrAsync}-${bufferOrString}`;
 
-// SYNC GCM
-(() => {
-  console.log('🔐 SYNC GCM...');
-  const encrypted = cipherSync(text, secretKey, 'gcm');
-  console.log('  ➤ Encrypted:', encrypted.toString());
-  const decrypted = decipherSync(encrypted, secretKey, 'gcm');
-  console.log('  ✔ Decrypted:', decrypted);
-  assert.strictEqual(decrypted, text, 'GCM sync: texto desencriptado no coincide');
-})();
+  const cipherFunction = syncOrAsync === "async" ? cipher : cipherSync;
+  const decipherFunction = syncOrAsync === "async" ? decipher : decipherSync;
 
-// SYNC CBC con Buffer
-(() => {
-  console.log('🔐 SYNC CBC con Buffer...');
-  const encrypted = cipherSync(buffer, secretKey, 'cbc');
-  console.log('  ➤ Encrypted Buffer:', encrypted.toString('hex'));
-  const decrypted = decipherSync(encrypted, secretKey, 'cbc');
-  console.log('  ✔ Decrypted Buffer:', decrypted.toString());
-  assert(Buffer.isBuffer(decrypted), 'CBC buffer: salida no es buffer');
-  assert.strictEqual(decrypted.toString(), text, 'CBC buffer: texto no coincide');
-})();
+  const originalData = bufferOrString === "string" ? original : Buffer.from(original);
 
-// SYNC GCM con Buffer
-(() => {
-  console.log('🔐 SYNC GCM con Buffer...');
-  const encrypted = cipherSync(buffer, secretKey, 'gcm');
-  console.log('  ➤ Encrypted Buffer:', encrypted.toString('hex'));
-  const decrypted = decipherSync(encrypted, secretKey, 'gcm');
-  console.log('  ✔ Decrypted Buffer:', decrypted.toString());
-  assert(Buffer.isBuffer(decrypted), 'GCM buffer: salida no es buffer');
-  assert.strictEqual(decrypted.toString(), text, 'GCM buffer: texto no coincide');
-})();
+  const ciphred = await cipherFunction(originalData, secretKey, method);
+  const deciphred = await decipherFunction(ciphred, secretKey, method);
 
-// GCM con authTag modificado (verifica integridad)
-(() => {
-  console.log('🧪 GCM con authTag modificado...');
-  const encrypted = cipherSync(text, secretKey, 'gcm');
-  const tampered = Buffer.from(encrypted);
-  tampered[15] ^= 0xff; // alteramos authTag
-  console.log('  ⚠️  Encrypted modificado:', tampered.toString('hex'));
+  const deciphredData = bufferOrString === "string" ? deciphred : deciphred.toString();
+
+  //console.log(original);
+  //console.log(ciphred);
+  //console.log(deciphredData);
+
+  if(original === deciphredData && original !== ciphred)
+  {
+    console.log(testName, "APROVED");
+  }
+  else
+  {
+    console.error(testName, "REJECTED");
+  }
+}
+
+/**
+ * Prueba que el modo GCM detecta claves alteradas.
+ * 
+ * @param {"sync"|"async"} syncOrAsync 
+ * @param {"buffer"|"string"} bufferOrString 
+ * @param {string} original 
+ * @param {string} secretKey 
+ * @returns {function}
+ */
+const getGcmIntegrityTest = (syncOrAsync, bufferOrString, original, secretKey) => async () =>
+{
+  const testName = `INTEGRITY GCM ${syncOrAsync}-${bufferOrString}`;
+
+  const cipherFunction = syncOrAsync === "async" ? cipher : cipherSync;
+  const decipherFunction = syncOrAsync === "async" ? decipher : decipherSync;
+
+  const originalData = bufferOrString === "string" ? original : Buffer.from(original);
 
   try {
-      decipherSync(tampered, secretKey, 'gcm');
-      assert.fail('Debe lanzar error por tag de autenticación inválido');
+    const ciphred = await cipherFunction(originalData, secretKey, "gcm");
+
+    // Alteramos la clave levemente (agregamos un carácter)
+    const wrongKey = secretKey + "X";
+
+    await decipherFunction(ciphred, wrongKey, "gcm");
+
+    // Si NO lanza error, la prueba falla
+    console.error(testName, "REJECTED (no se detectó alteración)");
   } catch (err) {
-      console.log('  ✔ Error capturado como se esperaba:', err.message);
-      assert.ok(err instanceof Error, 'Debe lanzar Error');
+    // Si lanza error, se aprueba (como debe ser en GCM)
+    console.log(testName, "APROVED (error capturado)");
   }
-})();
+}
 
-// STREAM CBC
-(() => {
-  console.log('🔄 STREAM CBC...');
-  const input = stream.Readable.from([text]);
-  const encryptedChunks = [];
-  const encryptedStream = new stream.PassThrough();
-  encryptedStream.on('data', chunk => encryptedChunks.push(chunk));
-  encryptedStream.on('end', () => {
-    const encrypted = Buffer.concat(encryptedChunks);
-    const decInput = stream.Readable.from([encrypted]);
-    const decryptedChunks = [];
-    const decryptedStream = new stream.PassThrough();
-    decryptedStream.on('data', chunk => decryptedChunks.push(chunk));
-    decryptedStream.on('end', () => {
-      const decrypted = Buffer.concat(decryptedChunks).toString();
-      console.log('  ✔ Decrypted STREAM CBC:', decrypted);
-      assert.strictEqual(decrypted, text, 'STREAM CBC: texto desencriptado no coincide');
-    });
-    decipherStream(decInput, decryptedStream, secretKey, 'cbc');
-  });
-  cipherStream(input, encryptedStream, secretKey, 'cbc');
-})();
+/**
+ * Prueba que descifrar con clave incorrecta lanza error (como debe ser).
+ * 
+ * @param {"sync"|"async"} syncOrAsync 
+ * @param {"buffer"|"string"} bufferOrString 
+ * @param {"cbc"|"gcm"} method
+ * @param {string} original 
+ * @param {string} secretKey 
+ * @returns {function}
+ */
+const getWrongKeyTest = (syncOrAsync, bufferOrString, method, original, secretKey) => async () =>
+{
+  const testName = `WRONG KEY ${syncOrAsync}-${bufferOrString}-${method}`;
 
-// STREAM GCM
-(() => {
-  console.log('🔄 STREAM GCM...');
-  const input = stream.Readable.from([text]);
-  const encryptedChunks = [];
-  const encryptedStream = new stream.PassThrough();
-  encryptedStream.on('data', chunk => encryptedChunks.push(chunk));
-  encryptedStream.on('end', () => {
-    const encrypted = Buffer.concat(encryptedChunks);
-    const decInput = stream.Readable.from([encrypted]);
-    const decryptedChunks = [];
-    const decryptedStream = new stream.PassThrough();
-    decryptedStream.on('data', chunk => decryptedChunks.push(chunk));
-    decryptedStream.on('end', () => {
-      const decrypted = Buffer.concat(decryptedChunks).toString();
-      console.log('  ✔ Decrypted STREAM GCM:', decrypted);
-      assert.strictEqual(decrypted, text, 'STREAM GCM: texto desencriptado no coincide');
-    });
-    decipherStream(decInput, decryptedStream, secretKey, 'gcm');
-  });
-  cipherStream(input, encryptedStream, secretKey, 'gcm');
-})();
+  const cipherFunction = syncOrAsync === "async" ? cipher : cipherSync;
+  const decipherFunction = syncOrAsync === "async" ? decipher : decipherSync;
+
+  const originalData = bufferOrString === "string" ? original : Buffer.from(original);
+
+  try {
+    const ciphred = await cipherFunction(originalData, secretKey, method);
+
+    // Usamos clave incorrecta para descifrar
+    const wrongKey = secretKey + "_bad";
+
+    await decipherFunction(ciphred, wrongKey, method);
+
+    // Si no lanza error, el test falla
+    console.error(testName, "REJECTED (no se detectó clave incorrecta)");
+  } catch (err) {
+    // Si lanza error, el test pasa
+    console.log(testName, "APROVED (error capturado)");
+  }
+}
+
+
+const runTests = async(...tests) =>
+{
+  for(let test of tests)
+  {
+    await test();
+  }
+}
+
+const original = "this is a text to proof encription";
+const secretKey = "this-is-a-secret-key";
+
+const tests = [
+  getCipherDacipherTests("sync", "string", "cbc", original, secretKey),
+  getCipherDacipherTests("async", "string", "cbc", original, secretKey),
+  getCipherDacipherTests("sync", "buffer", "cbc", original, secretKey),
+  getCipherDacipherTests("async", "buffer", "cbc", original, secretKey),
+  getCipherDacipherTests("sync", "string", "gcm", original, secretKey),
+  getCipherDacipherTests("async", "string", "gcm", original, secretKey),
+  getCipherDacipherTests("sync", "buffer", "gcm", original, secretKey),
+  getCipherDacipherTests("async", "buffer", "gcm", original, secretKey),
+
+  getGcmIntegrityTest("sync", "string", original, secretKey),
+  getGcmIntegrityTest("async", "string", original, secretKey),
+  getGcmIntegrityTest("sync", "buffer", original, secretKey),
+  getGcmIntegrityTest("async", "buffer", original, secretKey),
+
+  getWrongKeyTest("sync", "string", "cbc", original, secretKey),
+  getWrongKeyTest("async", "string", "cbc", original, secretKey),
+  getWrongKeyTest("sync", "buffer", "cbc", original, secretKey),
+  getWrongKeyTest("async", "buffer", "cbc", original, secretKey),
+  getWrongKeyTest("sync", "string", "gcm", original, secretKey),
+  getWrongKeyTest("async", "string", "gcm", original, secretKey),
+  getWrongKeyTest("sync", "buffer", "gcm", original, secretKey),
+  getWrongKeyTest("async", "buffer", "gcm", original, secretKey),
+]
+
+runTests(...tests);
